@@ -247,48 +247,7 @@ class BasicCleaner:
             })
         return df
 
-    # -----------------------------
-    # Fallback: known prefixes for your schema (optional but handy)
-    # -----------------------------
-    def force_known_prefixes(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        If most rows in specific known columns start with a short expected prefix,
-        strip it even if the general threshold logic didn't trigger.
-        """
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:
-            return df
-
-        df = df.copy()
-        changed = []
-
-        # map: lowercase column name -> expected lowercase prefix
-        rules = {
-            "gate": "gate",
-            "baggage_claim": "claim",
-            "layover_locations": "loc",
-            "aircraft_type": "type",
-        }
-
-        cols_lc = {c.lower(): c for c in df.columns}
-        for want_col_lc, prefix in rules.items():
-            if want_col_lc not in cols_lc:
-                continue
-            col = cols_lc[want_col_lc]
-            s = df[col].astype(str).str.strip()
-            starts = s.str[:len(prefix)].str.lower().eq(prefix)
-            share = starts.mean()   
-            if share >= 0.70:  # softer threshold
-                df[col] = s.where(~starts, s.str[len(prefix):])
-                changed.append({"column": col, "removed_prefix": prefix, "%rows": round(100*share, 2)})
-
-        if changed:
-            self.cleaning_log.append({
-                "operation": "force_known_prefixes",
-                "details": changed,
-                "success": True
-            })
-        return df
-
+   
     # -----------------------------
     # Pipeline
     # -----------------------------
@@ -316,9 +275,6 @@ class BasicCleaner:
 
         # 2.5) Strip uniform prefixes (underscore / separated / glued)
         df = self.strip_uniform_prefixes(df, threshold=0.85)
-
-        # 2.6) Safety net for known columns (gate/claim/loc/type)
-        df = self.force_known_prefixes(df)
 
         # 3) Case standardization
         if case_type and case_type.lower() != "none":
