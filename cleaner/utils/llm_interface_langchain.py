@@ -32,7 +32,7 @@ class AnalysisResult(BaseModel):
     total_issues: int = Field(description="Total number of issues found")
     issues: List[DataIssue] = Field(description="List of identified issues")
     column_renaming: Dict[str, str] = Field(description="Column renaming suggestions")
-    recommendations: List[str] = Field(description="General recommendations")
+    recommendations: List[str] = Field(default_factory=list, description="General recommendations")
     data_quality_score: Optional[int] = Field(default=85, description="Overall data quality score from 1-100")
 
 
