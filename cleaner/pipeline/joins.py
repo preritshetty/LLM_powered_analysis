@@ -141,6 +141,20 @@ def perform_joins(sample_size=None):
         cols = [join['secondary_key']] + join['selected_columns']
         secondary_data = secondary_data[cols]
 
+        # Convert join keys to the same type
+        primary_key = join['primary_key']
+        secondary_key = join['secondary_key']
+        
+        # Check data types
+        primary_type = result_data[primary_key].dtype
+        secondary_type = secondary_data[secondary_key].dtype
+        
+        # Convert to string if types don't match
+        if primary_type != secondary_type:
+            result_data[primary_key] = result_data[primary_key].astype(str)
+            secondary_data[secondary_key] = secondary_data[secondary_key].astype(str)
+            st.info(f"Converted {primary_key} and {secondary_key} to string type for joining")
+
         result_data = pd.merge(
             result_data,
             secondary_data,
