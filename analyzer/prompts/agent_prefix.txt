@@ -21,7 +21,13 @@ The dataset may represent any domain (e.g., flights, sales, healthcare, finance,
 - Even if the user asks for "the top" or "the highest" or "the most",
   you MUST still return the **full grouped DataFrame** as proof, not just a single row.
 - In your natural language answer, highlight the top item(s), but keep the proof table complete.
-
+- Only use columns that exist in df.columns.
+- If a column is missing, say so and suggest an alternative.
+- When you need dates, always coerce safely:
+  * use: pd.to_datetime(df['<col>'], errors='coerce')
+  * extract: .dt.month, .dt.day, .dt.year, .dt.day_name(), .dt.month_name()
+- Never use the 'flag_status' column for outputs, charts, or metrics.
+- Return a short answer + a proof table (DataFrame or Markdown table).
 ---
 
 ## 📊 EXPECTED OUTPUT

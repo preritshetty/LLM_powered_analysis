@@ -291,60 +291,16 @@ class FlagMapper:
 
 
 def main():
-    """Example usage of FlagMapper"""
-    # Example Phase 2 issues (like from your JSON file)
-    example_issues = [
-        {
-            "category": "consistency",
-            "description": "Contradictory information in the same row: window_seat=True AND aisle_seat=True",
-            "severity": "medium",
-            "affected_columns": ["window_seat", "aisle_seat"],
-            "fix_approach": "Review and correct the seating information to ensure consistency"
-        },
-        {
-            "category": "business_logic",
-            "description": "Departure date is after arrival date",
-            "severity": "high",
-            "affected_columns": ["departure_dt", "arrival_dt"],
-            "fix_approach": "Investigate and correct the departure and arrival date entries"
-        },
-        {
-            "category": "data_quality",
-            "description": "Missing loyalty points for a loyalty program member",
-            "severity": "medium",
-            "affected_columns": ["loyalty_pts", "reward_program_member"],
-            "fix_approach": "Ensure loyalty points are provided for loyalty program members"
-        },
-        {
-            "category": "relationships",
-            "description": "Mismatch between number of stops and layover locations",
-            "severity": "low",
-            "affected_columns": ["number_of_stops", "layover_locations"],
-            "fix_approach": "Ensure consistency between the number of stops and layover locations"
-        }
-    ]
-    
-    # Create flag mapper
+    """Test FlagMapper functionality"""
+    # Create flag mapper instance
     mapper = FlagMapper()
     
-    # Create mapping
-    flag_mapping = mapper.create_flag_mapping(example_issues)
-    
-    # Save to file
-    filepath = mapper.save_mapping_to_file()
-    
-    # Show summary
-    summary = mapper.get_mapping_summary()
-    print(f"\n📊 Flag Mapping Summary:")
-    for key, value in summary.items():
-        print(f"  {key}: {value}")
-    
-    # Show some combinations
-    print(f"\n🔢 Example Flag Combinations:")
-    combinations = mapper.get_flag_combinations()
-    for combo_value in [1, 2, 3, 5, 15]:  # Show a few examples
-        if combo_value in combinations:
-            print(f"  Flag {combo_value}: {combinations[combo_value]}")
+    print("FlagMapper initialized and ready for Phase 2 analysis results")
+    print("Use this class as part of the analysis pipeline:")
+    print("1. Get issues from Phase 2 AI analysis")
+    print("2. Create flag mapping with create_flag_mapping()")
+    print("3. Save mapping with save_mapping_to_file()")
+    print("4. Use get_mapping_summary() to review results")
 
 
 if __name__ == "__main__":

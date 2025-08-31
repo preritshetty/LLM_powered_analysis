@@ -1,7 +1,10 @@
+# query_handler.py
 import pandas as pd
 import io
 import re
 import streamlit as st
+import numpy as np
+from datetime import datetime
 
 # -------------------------------
 # Utilities
@@ -95,7 +98,6 @@ def _build_context_block() -> str:
     for i, turn in enumerate(st.session_state.conv_context, start=1):
         q = re.sub(r"\s+", " ", turn["q"]).strip()
         a = re.sub(r"\s+", " ", turn["a"]).strip()
-        # Keep answers brief in memory to avoid huge prompts
         a_short = a if len(a) <= 300 else (a[:297] + "…")
         lines.append(f"- Q{i}: {q}")
         lines.append(f"  A{i}: {a_short}")
@@ -149,10 +151,16 @@ def run_query(agent, query: str, df: pd.DataFrame) -> tuple[str, pd.DataFrame | 
             "1. A short explanation\n" \
             "2. A markdown table with the supporting data"
 
-        # ✅ Ensure df + pd are always injected into the tool sandbox
+        # ✅ Ensure df + helpers are available in the tool sandbox
         if hasattr(agent, "tools") and agent.tools:
             try:
-                agent.tools[0].locals = {"df": df, "pd": pd}
+                agent.tools[0].locals = {
+                    "df": df,
+                    "pd": pd,
+                    "np": np,
+                    "re": re,
+                    "datetime": datetime
+                }
             except Exception:
                 pass
 
@@ -161,26 +169,24 @@ def run_query(agent, query: str, df: pd.DataFrame) -> tuple[str, pd.DataFrame | 
         response = result.get("output", "").strip()
         result_df = None
 
-        # Step 1: check intermediate DataFrame outputs
+        # Prefer DataFrame that the tool actually produced
         for step in result.get("intermediate_steps", []):
             if isinstance(step[1], pd.DataFrame):
                 result_df = step[1]
                 break
 
-        # Step 2: parse markdown table from response text
+        # If none, try to parse a markdown table from the LLM text
         if result_df is None:
             result_df = parse_markdown_table(response)
 
-        # Step 3: clean + format proof table
-        if result_df is not None:
+        # Clean + format proof table if present; otherwise fall back to a single-cell DF
+        if result_df is not None and not result_df.empty:
             result_df = format_table_for_query(query, result_df)
             result_df = clean_dataframe(result_df)
-
-        # Step 4: fallback if nothing worked
-        if result_df is None:
+        else:
             result_df = pd.DataFrame({"Answer": [response]})
 
-        # 🧠 Update conversational memory (only if we actually produced an answer string)
+        # 🧠 Update conversational memory
         _push_context(query, response)
 
         return str(response), result_df
