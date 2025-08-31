@@ -144,12 +144,34 @@ def run_query(agent, query: str, df: pd.DataFrame) -> tuple[str, pd.DataFrame | 
     try:
         # 🔗 Inject recent conversational context
         context_block = _build_context_block()
+
+        # 🧾 Provide a compact schema so the LLM uses the real df (no toy data).
+        # Keep it short to avoid prompt bloat.
+        cols_preview = ", ".join([f"{c}({str(t)})" for c, t in df.dtypes.items()])
+        row_count = len(df)
+        schema_block = (
+            "DATA CONTRACT (MUST FOLLOW):\n"
+            f"- Use ONLY the provided pandas DataFrame named `df` (rows={row_count}).\n"
+            "- DO NOT create synthetic/sample DataFrames in memory.\n"
+            "- DO NOT hardcode answers. Compute with pandas on `df`.\n"
+            "- Use only these columns (exact spelling):\n"
+            f"  {cols_preview}\n"
+            "- If a date-like field is needed, convert with `pd.to_datetime(..., errors='coerce')`.\n"
+            "- If user asks about month/weekday, derive from a date column and report month/weekday NAMES in the proof.\n"
+            "- Always return a full grouped table as proof (not just a single row), then highlight the top item(s) in text.\n"
+            "- Never use the `flag_status` column in outputs.\n"
+        )
+
+        # 🧠 Task directive
+        task_block = (
+            "TASK FORMAT:\n"
+            "1) A short explanation with exact numbers based on `df`.\n"
+            "2) A markdown table with the supporting data (no code blocks).\n"
+        )
+
         formatted_query = (
             (context_block + "\n\n") if context_block else ""
-        ) + f"New user question: {query}\n\n" \
-            "IMPORTANT: Respond in two parts:\n" \
-            "1. A short explanation\n" \
-            "2. A markdown table with the supporting data"
+        ) + schema_block + "\n" + task_block + f"\nUSER QUESTION:\n{query}\n"
 
         # ✅ Ensure df + helpers are available in the tool sandbox
         if hasattr(agent, "tools") and agent.tools:
@@ -169,11 +191,23 @@ def run_query(agent, query: str, df: pd.DataFrame) -> tuple[str, pd.DataFrame | 
         response = result.get("output", "").strip()
         result_df = None
 
-        # Prefer DataFrame that the tool actually produced
+        # Prefer a DataFrame (or Series/dict) that the tool actually produced
         for step in result.get("intermediate_steps", []):
-            if isinstance(step[1], pd.DataFrame):
-                result_df = step[1]
+            out = step[1]
+            if isinstance(out, pd.DataFrame):
+                result_df = out
                 break
+            # Accept common shapes and normalize to DataFrame
+            if isinstance(out, pd.Series):
+                result_df = out.reset_index()
+                result_df.columns = ["Index", "Value"]
+                break
+            if isinstance(out, dict):
+                try:
+                    result_df = pd.DataFrame(list(out.items()), columns=["Key", "Value"])
+                    break
+                except Exception:
+                    pass
 
         # If none, try to parse a markdown table from the LLM text
         if result_df is None:

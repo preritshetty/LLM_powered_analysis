@@ -1,0 +1,227 @@
+{
+  "execution_summary": {
+    "total_rows": 10000,
+    "flagged_rows": 9153,
+    "clean_rows": 847,
+    "flagged_percentage": 91.53,
+    "total_detections": 17371,
+    "execution_time_seconds": 0.16,
+    "successful_codes": 4,
+    "failed_codes": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-08-31T23:11:54.630575"
+  },
+  "individual_results": [
+    {
+      "flag_value": 1,
+      "success": true,
+      "rows_detected": 2421,
+      "explanation": "This code detects rows where both Window Seat and Aisle Seat are marked as true, indicating a contradictory situation. It flags these rows for further investigation.",
+      "code": "df.loc[(df['Window Seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1']) & df['Aisle Seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1'])), 'flag_status'] |= 1",
+      "error": null
+    },
+    {
+      "flag_value": 2,
+      "success": true,
+      "rows_detected": 3347,
+      "explanation": "This code detects inconsistencies between the flight status being 'cancelled' and the actual departure/arrival times not matching the scheduled departure/arrival times.",
+      "code": "df.loc[(df['Status'].str.lower() == 'cancelled') & ((pd.to_datetime(df['Departure Datetime'], errors='coerce') != pd.to_datetime(df['Departure Time'], errors='coerce')) | (pd.to_datetime(df['Arrival Datetime'], errors='coerce') != pd.to_datetime(df['Arrival Time'], errors='coerce'))), 'flag_status'] |= 2",
+      "error": null
+    },
+    {
+      "flag_value": 4,
+      "success": true,
+      "rows_detected": 4912,
+      "explanation": "This code detects rows where the departure datetime is after the arrival datetime, violating the business logic. It converts the 'Departure Datetime' and 'Arrival Datetime' columns to datetime format and checks if the departure datetime is greater than the arrival datetime.",
+      "code": "df.loc[(pd.to_datetime(df['Departure Datetime'], errors='coerce') > pd.to_datetime(df['Arrival Datetime'], errors='coerce')) & df['Departure Datetime'].notna() & df['Arrival Datetime'].notna(), 'flag_status'] |= 4",
+      "error": null
+    },
+    {
+      "flag_value": 8,
+      "success": true,
+      "rows_detected": 6691,
+      "explanation": "Checks for mismatch between Layovers and Layover Locations",
+      "code": "df.loc[(pd.to_numeric(df['Layovers'], errors='coerce').fillna(0).astype(int) != df['Layover Locations'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 8",
+      "error": null
+    }
+  ],
+  "flag_breakdown": {
+    "individual_flags": {
+      "1": 2421,
+      "2": 3347,
+      "4": 4912,
+      "8": 6691
+    },
+    "combined_flags": {
+      "3": 122,
+      "12": 1686,
+      "11": 284,
+      "8": 1696,
+      "13": 499,
+      "6": 417,
+      "10": 871,
+      "4": 798,
+      "15": 259,
+      "5": 297,
+      "2": 438,
+      "1": 260,
+      "9": 570,
+      "14": 826,
+      "7": 130
+    },
+    "flag_combinations": [
+      {
+        "flag_status": 3,
+        "individual_flags": [
+          1,
+          2
+        ],
+        "flag_description": "Flags 1+2",
+        "row_count": 122,
+        "binary_representation": "11"
+      },
+      {
+        "flag_status": 12,
+        "individual_flags": [
+          4,
+          8
+        ],
+        "flag_description": "Flags 4+8",
+        "row_count": 1686,
+        "binary_representation": "1100"
+      },
+      {
+        "flag_status": 11,
+        "individual_flags": [
+          1,
+          2,
+          8
+        ],
+        "flag_description": "Flags 1+2+8",
+        "row_count": 284,
+        "binary_representation": "1011"
+      },
+      {
+        "flag_status": 8,
+        "individual_flags": [
+          8
+        ],
+        "flag_description": "Flags 8",
+        "row_count": 1696,
+        "binary_representation": "1000"
+      },
+      {
+        "flag_status": 13,
+        "individual_flags": [
+          1,
+          4,
+          8
+        ],
+        "flag_description": "Flags 1+4+8",
+        "row_count": 499,
+        "binary_representation": "1101"
+      },
+      {
+        "flag_status": 6,
+        "individual_flags": [
+          2,
+          4
+        ],
+        "flag_description": "Flags 2+4",
+        "row_count": 417,
+        "binary_representation": "110"
+      },
+      {
+        "flag_status": 10,
+        "individual_flags": [
+          2,
+          8
+        ],
+        "flag_description": "Flags 2+8",
+        "row_count": 871,
+        "binary_representation": "1010"
+      },
+      {
+        "flag_status": 4,
+        "individual_flags": [
+          4
+        ],
+        "flag_description": "Flags 4",
+        "row_count": 798,
+        "binary_representation": "100"
+      },
+      {
+        "flag_status": 15,
+        "individual_flags": [
+          1,
+          2,
+          4,
+          8
+        ],
+        "flag_description": "Flags 1+2+4+8",
+        "row_count": 259,
+        "binary_representation": "1111"
+      },
+      {
+        "flag_status": 5,
+        "individual_flags": [
+          1,
+          4
+        ],
+        "flag_description": "Flags 1+4",
+        "row_count": 297,
+        "binary_representation": "101"
+      },
+      {
+        "flag_status": 2,
+        "individual_flags": [
+          2
+        ],
+        "flag_description": "Flags 2",
+        "row_count": 438,
+        "binary_representation": "10"
+      },
+      {
+        "flag_status": 1,
+        "individual_flags": [
+          1
+        ],
+        "flag_description": "Flags 1",
+        "row_count": 260,
+        "binary_representation": "1"
+      },
+      {
+        "flag_status": 9,
+        "individual_flags": [
+          1,
+          8
+        ],
+        "flag_description": "Flags 1+8",
+        "row_count": 570,
+        "binary_representation": "1001"
+      },
+      {
+        "flag_status": 14,
+        "individual_flags": [
+          2,
+          4,
+          8
+        ],
+        "flag_description": "Flags 2+4+8",
+        "row_count": 826,
+        "binary_representation": "1110"
+      },
+      {
+        "flag_status": 7,
+        "individual_flags": [
+          1,
+          2,
+          4
+        ],
+        "flag_description": "Flags 1+2+4",
+        "row_count": 130,
+        "binary_representation": "111"
+      }
+    ]
+  }
+}
