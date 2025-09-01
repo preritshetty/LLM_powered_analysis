@@ -1,0 +1,49 @@
+{
+  "total_codes": 6,
+  "detection_codes": [
+    {
+      "flag_value": 1,
+      "detection_code": "df.loc[(pd.to_datetime(df['departure_datetime'], errors='coerce') > pd.to_datetime(df['arrival_datetime'], errors='coerce')) & pd.to_datetime(df['departure_datetime'], errors='coerce').notna() & pd.to_datetime(df['arrival_datetime'], errors='coerce').notna(), 'flag_status'] |= 1",
+      "explanation": "This code flags rows where the departure date is after the arrival date, indicating a data consistency issue.",
+      "test_description": "To test this detection, create a DataFrame with 'departure_datetime' and 'arrival_datetime' columns. Include rows where the departure date is after the arrival date and verify that these rows are flagged with a 1 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'departure_datetime' and 'arrival_datetime' columns are in a format that can be parsed by pandas to_datetime function. The code safely handles parsing errors by using 'errors=coerce', which converts invalid dates to NaT."
+    },
+    {
+      "flag_value": 2,
+      "detection_code": "df.loc[(df['window_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1']) & df['aisle_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1'])), 'flag_status'] |= 2",
+      "explanation": "This code checks for rows where both 'window_seat' and 'aisle_seat' are marked as true, which is generally impossible, and flags them with a value of 2 in the 'flag_status' column.",
+      "test_description": "To test this detection, create a DataFrame with columns 'window_seat' and 'aisle_seat' containing various combinations of boolean-like values (e.g., 'true', 'false', 'yes', 'no'). Verify that rows where both columns are true are flagged with a 2 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'flag_status' column exists in the DataFrame and is capable of storing set operations. The code safely handles different boolean representations by normalizing them to a consistent format."
+    },
+    {
+      "flag_value": 4,
+      "detection_code": "df.loc[(pd.to_datetime(df['arrival_datetime'], errors='coerce') - pd.to_datetime(df['departure_datetime'], errors='coerce')).dt.total_seconds() / 3600 != pd.to_numeric(df['duration_hours'], errors='coerce'), 'flag_status'] |= 4",
+      "explanation": "This code flags rows where the calculated duration in hours between 'arrival_datetime' and 'departure_datetime' does not match the value in 'duration_hours'. It uses pandas to convert the datetime columns and calculates the difference in hours, comparing it to the 'duration_hours' column.",
+      "test_description": "To test this detection, create a DataFrame with columns 'departure_datetime', 'arrival_datetime', and 'duration_hours'. Include rows where the duration calculated from the datetime columns does not match 'duration_hours'. Run the detection code and verify that these rows are flagged with the value 4 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the datetime columns are in a valid format that pandas can parse. The code handles errors by coercing invalid datetime and numeric conversions to NaT and NaN, respectively, which are safely ignored in the comparison."
+    },
+    {
+      "flag_value": 8,
+      "detection_code": "df.loc[(pd.to_numeric(df['layovers'], errors='coerce').fillna(0).astype(int) != df['layover_locations'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))) & pd.to_numeric(df['layovers'], errors='coerce').notna(), 'flag_status'] |= 8",
+      "explanation": "This code checks for mismatches between the number of layovers and the number of entries in layover_locations. It flags rows where the count of layovers does not match the number of parsed entries in layover_locations.",
+      "test_description": "To test this detection, create a DataFrame with columns 'layovers' and 'layover_locations'. Include cases where the number of layovers does not match the number of entries in layover_locations, and verify that these rows are flagged with the value 8 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'layovers' column contains numeric values or can be safely coerced to numeric. The 'layover_locations' column should be a string or convertible to a string. The code handles missing values by treating them as zero layovers or empty layover locations."
+    },
+    {
+      "flag_value": 16,
+      "detection_code": "df.loc[(df.columns.str.contains('flight_number', case=False).sum() != 1) | (df.columns.str.contains('arrival_time', case=False).sum() != 1), 'flag_status'] |= 16",
+      "explanation": "This code checks for inconsistent column naming or potential typos by verifying that there is exactly one column matching 'flight_number' and 'arrival_time', ignoring case. If there are zero or more than one matches for either column, it flags the row with the value 16.",
+      "test_description": "To test this detection, create a DataFrame with columns that have variations or typos of 'flight_number' and 'arrival_time', such as 'FlightNumber', 'arrivalTime', or 'flight_num'. The code should flag these inconsistencies by setting the 'flag_status' to 16.",
+      "safety_notes": "Ensure that the DataFrame has a 'flag_status' column initialized to a set or similar structure that can handle bitwise OR operations. The code assumes that column names are unique and checks for their presence using case-insensitive matching."
+    },
+    {
+      "flag_value": 32,
+      "detection_code": "df.loc[(df['airline_id'].isna() | (df['airline_id'].astype(str).str.strip() == '') | df['passenger_name'].isna() | (df['passenger_name'].astype(str).str.strip() == '') | df['departure_time'].isna() | (df['departure_time'].astype(str).str.strip() == '')), 'flag_status'] |= 32",
+      "explanation": "This code flags rows where any of the columns 'airline_id', 'passenger_name', or 'departure_time' are missing or empty, indicating potentially confusing column names that may need to be renamed for clarity.",
+      "test_description": "To test this detection, create a DataFrame with columns 'airline_id', 'passenger_name', and 'departure_time'. Include some rows with missing or empty values in these columns. Run the detection code and verify that the 'flag_status' column is updated with the flag value 32 for those rows.",
+      "safety_notes": "Ensure that the DataFrame contains the 'flag_status' column initialized to a set or similar structure that supports the |= operation. The code safely handles missing or empty values without raising exceptions."
+    }
+  ],
+  "generation_timestamp": "2025-09-01T18:31:45.759764",
+  "llm_model": "gpt-4o"
+}

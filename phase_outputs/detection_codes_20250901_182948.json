@@ -1,0 +1,56 @@
+{
+  "total_codes": 7,
+  "detection_codes": [
+    {
+      "flag_value": 1,
+      "detection_code": "df.loc[(pd.to_datetime(df['departure_datetime'], errors='coerce') > pd.to_datetime(df['arrival_datetime'], errors='coerce')) & pd.to_datetime(df['departure_datetime'], errors='coerce').notna() & pd.to_datetime(df['arrival_datetime'], errors='coerce').notna(), 'flag_status'] |= 1",
+      "explanation": "This code checks for rows where the departure date is after the arrival date, which is a data consistency issue. It flags these rows by setting the 'flag_status' column to 1.",
+      "test_description": "To test this detection, create a DataFrame with 'departure_datetime' and 'arrival_datetime' columns. Include cases where the departure date is after the arrival date and verify that these rows are flagged with a 1 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'departure_datetime' and 'arrival_datetime' columns are in a format that can be parsed by pd.to_datetime. The code safely handles non-datetime values by coercing them to NaT, which are then excluded from the flagging condition."
+    },
+    {
+      "flag_value": 2,
+      "detection_code": "df.loc[(df['window_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1']) & df['aisle_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1'])), 'flag_status'] |= 2",
+      "explanation": "This code detects rows where both 'window_seat' and 'aisle_seat' are marked as true, which is inconsistent as a seat cannot be both a window and an aisle seat simultaneously. It flags these rows with a value of 2 in the 'flag_status' column.",
+      "test_description": "To test this detection, create a DataFrame with columns 'window_seat' and 'aisle_seat'. Include rows where both columns are marked as true (e.g., 'True', 'yes', '1') and verify that these rows are flagged with a 2 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'flag_status' column exists in the DataFrame and is initialized properly before running this code. The code assumes that 'window_seat' and 'aisle_seat' columns contain boolean-like values that can be normalized to true or false."
+    },
+    {
+      "flag_value": 4,
+      "detection_code": "df.loc[(pd.to_numeric(df['number_of_stops'], errors='coerce').fillna(0).astype(int) != df['layover_locations'].fillna('').astype(str).apply(lambda x: len([item.strip() for item in re.split(r'[;,|>]|->', str(x)) if item.strip()]))) & pd.to_numeric(df['number_of_stops'], errors='coerce').notna(), 'flag_status'] |= 4",
+      "explanation": "This code checks if the number of stops does not match the count of layover locations for each row in the DataFrame. If they do not match, it flags the row with a value of 4 in the 'flag_status' column.",
+      "test_description": "To test this detection, create a DataFrame with columns 'number_of_stops' and 'layover_locations'. Include cases where the number of stops matches the count of layover locations and cases where they do not. Verify that only the mismatched cases are flagged with a 4 in the 'flag_status' column.",
+      "safety_notes": "Ensure that the 'number_of_stops' column contains numeric values or can be safely coerced to numeric. The 'layover_locations' column should be a string or convertible to a string, with layover locations separated by delimiters such as ';', ',', '|', '>', or '->'."
+    },
+    {
+      "flag_value": 8,
+      "detection_code": "df.loc[(pd.to_numeric(df['duration_hours'], errors='coerce') != (pd.to_datetime(df['arrival_datetime'], errors='coerce') - pd.to_datetime(df['departure_datetime'], errors='coerce')).dt.total_seconds() / 3600) & pd.to_numeric(df['duration_hours'], errors='coerce').notna() & pd.to_datetime(df['arrival_datetime'], errors='coerce').notna() & pd.to_datetime(df['departure_datetime'], errors='coerce').notna(), 'flag_status'] |= 8",
+      "explanation": "This code flags rows where the 'duration_hours' column does not match the calculated difference in hours between 'arrival_datetime' and 'departure_datetime'.",
+      "test_description": "To test this detection, create a DataFrame with columns 'departure_datetime', 'arrival_datetime', and 'duration_hours'. Include rows where 'duration_hours' is incorrect based on the datetime difference, and verify that these rows are flagged with the value 8.",
+      "safety_notes": "Ensure that 'departure_datetime' and 'arrival_datetime' are in a parseable datetime format. The code handles non-numeric 'duration_hours' values by coercing them to NaN, which are then ignored in the comparison."
+    },
+    {
+      "flag_value": 16,
+      "detection_code": "df.loc[(df.columns.str.contains(r'[^a-zA-Z0-9_]', regex=True) | df.columns.str.contains(r'\\b(?:flight|arrival|passenger|airline)\\b', case=False, regex=True)), 'flag_status'] |= 16",
+      "explanation": "This code flags columns with inconsistent naming due to special characters or abbreviations in the column names 'flight_number', 'arrival_time', 'passenger_name', and 'airline_id'.",
+      "test_description": "To test this detection, create a DataFrame with columns that include special characters or abbreviations in the names of 'flight_number', 'arrival_time', 'passenger_name', and 'airline_id'. Run the detection code to ensure these columns are flagged.",
+      "safety_notes": "Ensure that the DataFrame has a 'flag_status' column initialized to a set or similar structure to accumulate flags. The code checks for special characters and specific abbreviations in column names, which should be verified against the actual data schema."
+    },
+    {
+      "flag_value": 32,
+      "detection_code": "df.loc[~df['seat_number'].astype(str).str.match(r'^\\d+[A-Z]$', na=False), 'flag_status'] |= 32",
+      "explanation": "This code flags rows where the 'seat_number' does not match the expected format of a row number followed by a seat letter (e.g., '12A').",
+      "test_description": "To test this detection, create a DataFrame with a 'seat_number' column containing values like '12A', '3B', '15C', and incorrect formats like 'A12', '12', 'B3'. The code should flag the rows with incorrect formats.",
+      "safety_notes": "Ensure that the 'seat_number' column is present in the DataFrame. The regex pattern assumes the seat letter is uppercase and directly follows the row number."
+    },
+    {
+      "flag_value": 64,
+      "detection_code": "df.loc[(pd.to_numeric(df['layovers'], errors='coerce').fillna(0).astype(int) != df['layover_locations'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 64",
+      "explanation": "This code checks for mismatches between the number of layovers and the number of layover locations listed. It converts the 'layovers' column to a numeric type, filling NaNs with 0 and ensuring it's an integer. It then counts the number of items in 'layover_locations' by splitting the string on common delimiters and counting non-empty tokens. If the counts do not match, it flags the row with a value of 64 in the 'flag_status' column.",
+      "test_description": "To test this detection, create a DataFrame with columns 'layovers' and 'layover_locations'. Populate 'layovers' with numeric values and 'layover_locations' with strings containing locations separated by delimiters like ';', ',', '|', '>', or '->'. Ensure some rows have mismatched counts between these columns. Run the detection code and verify that rows with mismatches are flagged with 64 in the 'flag_status' column.",
+      "safety_notes": "The code safely handles non-numeric values in the 'layovers' column by coercing them to NaN and filling with 0. It also handles empty or NaN values in 'layover_locations' by treating them as empty strings. The use of regular expressions ensures that various delimiters are correctly handled when counting locations."
+    }
+  ],
+  "generation_timestamp": "2025-09-01T18:29:48.336134",
+  "llm_model": "gpt-4o"
+}

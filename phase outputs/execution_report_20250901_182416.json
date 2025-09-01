@@ -1,0 +1,277 @@
+{
+  "execution_summary": {
+    "total_rows": 10000,
+    "flagged_rows": 10000,
+    "clean_rows": 0,
+    "flagged_percentage": 100.0,
+    "total_detections": 27366,
+    "execution_time_seconds": 0.04,
+    "successful_codes": 7,
+    "failed_codes": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-01T18:24:16.319732"
+  },
+  "individual_results": [
+    {
+      "flag_value": 1,
+      "success": true,
+      "rows_detected": 4912,
+      "explanation": "This code detects rows where the departure date is after the arrival date by converting the 'departure_datetime' and 'arrival_datetime' columns to datetime objects and comparing them. It ensures that the departure date is always before the arrival date.",
+      "code": "df.loc[(pd.to_datetime(df['departure_datetime'], errors='coerce') > pd.to_datetime(df['arrival_datetime'], errors='coerce')) & df['departure_datetime'].notna() & df['arrival_datetime'].notna(), 'flag_status'] |= 1",
+      "error": null
+    },
+    {
+      "flag_value": 2,
+      "success": true,
+      "rows_detected": 2421,
+      "explanation": "This code detects rows where both window_seat and aisle_seat are marked as true, which is typically not possible.",
+      "code": "df.loc[(df['window_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1']) & df['aisle_seat'].astype(str).str.strip().str.lower().isin(['true','t','yes','y','1'])), 'flag_status'] |= 2",
+      "error": null
+    },
+    {
+      "flag_value": 4,
+      "success": true,
+      "rows_detected": 10000,
+      "explanation": "This code detects rows where the duration_hours column does not match the actual difference between arrival and departure times. It calculates the time difference in hours between arrival and departure times and compares it with the duration_hours column.",
+      "code": "df.loc[((pd.to_datetime(df['arrival_datetime'], errors='coerce') - pd.to_datetime(df['departure_datetime'], errors='coerce')).dt.total_seconds() / 3600 != df['duration_hours']) & df['departure_datetime'].notna() & df['arrival_datetime'].notna() & df['duration_hours'].notna(), 'flag_status'] |= 4",
+      "error": null
+    },
+    {
+      "flag_value": 8,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "Fallback for Mismatch between layovers count and layover_locations entries.",
+      "code": "# Fallback detection for flag 8\ndf.loc[df.index == -1, 'flag_status'] |= 8  # Placeholder",
+      "error": null
+    },
+    {
+      "flag_value": 16,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "This code flags rows where 'flight_number' is not missing, but 'arrival_time' is missing or empty.",
+      "code": "df.loc[(df['flight_number'].notna() & (df['arrival_time'].isna() | (df['arrival_time'].astype(str).str.strip() == ''))), 'flag_status'] |= 16",
+      "error": null
+    },
+    {
+      "flag_value": 32,
+      "success": true,
+      "rows_detected": 6686,
+      "explanation": "Checks for mismatch between number_of_stops and layovers",
+      "code": "df.loc[(pd.to_numeric(df['number_of_stops'], errors='coerce').fillna(0).astype(int) != df['layovers'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 32",
+      "error": null
+    },
+    {
+      "flag_value": 64,
+      "success": true,
+      "rows_detected": 3347,
+      "explanation": "This code flags rows where the flight status is 'Cancelled' but operational data like gate or terminal are filled.",
+      "code": "df.loc[(df['status'].str.lower() == 'cancelled') & (df['gate'].notna() | df['terminal'].notna()), 'flag_status'] |= 64",
+      "error": null
+    }
+  ],
+  "flag_breakdown": {
+    "individual_flags": {
+      "1": 4912,
+      "2": 2421,
+      "4": 10000,
+      "32": 6686,
+      "64": 3347
+    },
+    "combined_flags": {
+      "102": 275,
+      "36": 1720,
+      "37": 1664,
+      "39": 527,
+      "101": 812,
+      "100": 887,
+      "5": 820,
+      "7": 269,
+      "4": 823,
+      "103": 252,
+      "71": 137,
+      "70": 131,
+      "68": 422,
+      "38": 549,
+      "6": 281,
+      "69": 431
+    },
+    "flag_combinations": [
+      {
+        "flag_status": 102,
+        "individual_flags": [
+          2,
+          4,
+          32,
+          64
+        ],
+        "flag_description": "Flags 2+4+32+64",
+        "row_count": 275,
+        "binary_representation": "1100110"
+      },
+      {
+        "flag_status": 36,
+        "individual_flags": [
+          4,
+          32
+        ],
+        "flag_description": "Flags 4+32",
+        "row_count": 1720,
+        "binary_representation": "100100"
+      },
+      {
+        "flag_status": 37,
+        "individual_flags": [
+          1,
+          4,
+          32
+        ],
+        "flag_description": "Flags 1+4+32",
+        "row_count": 1664,
+        "binary_representation": "100101"
+      },
+      {
+        "flag_status": 39,
+        "individual_flags": [
+          1,
+          2,
+          4,
+          32
+        ],
+        "flag_description": "Flags 1+2+4+32",
+        "row_count": 527,
+        "binary_representation": "100111"
+      },
+      {
+        "flag_status": 101,
+        "individual_flags": [
+          1,
+          4,
+          32,
+          64
+        ],
+        "flag_description": "Flags 1+4+32+64",
+        "row_count": 812,
+        "binary_representation": "1100101"
+      },
+      {
+        "flag_status": 100,
+        "individual_flags": [
+          4,
+          32,
+          64
+        ],
+        "flag_description": "Flags 4+32+64",
+        "row_count": 887,
+        "binary_representation": "1100100"
+      },
+      {
+        "flag_status": 5,
+        "individual_flags": [
+          1,
+          4
+        ],
+        "flag_description": "Flags 1+4",
+        "row_count": 820,
+        "binary_representation": "101"
+      },
+      {
+        "flag_status": 7,
+        "individual_flags": [
+          1,
+          2,
+          4
+        ],
+        "flag_description": "Flags 1+2+4",
+        "row_count": 269,
+        "binary_representation": "111"
+      },
+      {
+        "flag_status": 4,
+        "individual_flags": [
+          4
+        ],
+        "flag_description": "Flags 4",
+        "row_count": 823,
+        "binary_representation": "100"
+      },
+      {
+        "flag_status": 103,
+        "individual_flags": [
+          1,
+          2,
+          4,
+          32,
+          64
+        ],
+        "flag_description": "Flags 1+2+4+32+64",
+        "row_count": 252,
+        "binary_representation": "1100111"
+      },
+      {
+        "flag_status": 71,
+        "individual_flags": [
+          1,
+          2,
+          4,
+          64
+        ],
+        "flag_description": "Flags 1+2+4+64",
+        "row_count": 137,
+        "binary_representation": "1000111"
+      },
+      {
+        "flag_status": 70,
+        "individual_flags": [
+          2,
+          4,
+          64
+        ],
+        "flag_description": "Flags 2+4+64",
+        "row_count": 131,
+        "binary_representation": "1000110"
+      },
+      {
+        "flag_status": 68,
+        "individual_flags": [
+          4,
+          64
+        ],
+        "flag_description": "Flags 4+64",
+        "row_count": 422,
+        "binary_representation": "1000100"
+      },
+      {
+        "flag_status": 38,
+        "individual_flags": [
+          2,
+          4,
+          32
+        ],
+        "flag_description": "Flags 2+4+32",
+        "row_count": 549,
+        "binary_representation": "100110"
+      },
+      {
+        "flag_status": 6,
+        "individual_flags": [
+          2,
+          4
+        ],
+        "flag_description": "Flags 2+4",
+        "row_count": 281,
+        "binary_representation": "110"
+      },
+      {
+        "flag_status": 69,
+        "individual_flags": [
+          1,
+          4,
+          64
+        ],
+        "flag_description": "Flags 1+4+64",
+        "row_count": 431,
+        "binary_representation": "1000101"
+      }
+    ]
+  }
+}

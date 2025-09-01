@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "created_at": "2025-09-01T18:29:12.996915",
+    "total_flags": 7,
+    "max_flag_value": 64,
+    "description": "Binary flag mapping for Phase 2 data quality issues"
+  },
+  "flag_mapping": {
+    "1": "Departure date is after arrival date.",
+    "2": "Both window_seat and aisle_seat are marked as true, which is not possible.",
+    "4": "Number of stops does not match the number of layover locations.",
+    "8": "Duration in hours does not match the difference between arrival and departure times.",
+    "16": "Inconsistent column naming with special characters and abbreviations.",
+    "32": "Potentially incorrect seat_number format.",
+    "64": "Mismatch between layovers count and layover_locations."
+  },
+  "issue_details": {
+    "1": {
+      "description": "Departure date is after arrival date.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime"
+      ],
+      "fix_approach": "Ensure departure_datetime is always before arrival_datetime."
+    },
+    "2": {
+      "description": "Both window_seat and aisle_seat are marked as true, which is not possible.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "window_seat",
+        "aisle_seat"
+      ],
+      "fix_approach": "Verify seat assignment logic to ensure only one of window_seat or aisle_seat can be true."
+    },
+    "4": {
+      "description": "Number of stops does not match the number of layover locations.",
+      "category": "Business Logic Violation",
+      "severity": "High",
+      "affected_columns": [
+        "number_of_stops",
+        "layover_locations"
+      ],
+      "fix_approach": "Ensure the number of stops matches the count of layover locations."
+    },
+    "8": {
+      "description": "Duration in hours does not match the difference between arrival and departure times.",
+      "category": "Business Logic Violation",
+      "severity": "Medium",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime",
+        "duration_hours"
+      ],
+      "fix_approach": "Calculate duration_hours as the difference between arrival_datetime and departure_datetime."
+    },
+    "16": {
+      "description": "Inconsistent column naming with special characters and abbreviations.",
+      "category": "Data Quality",
+      "severity": "Medium",
+      "affected_columns": [
+        "flight_number",
+        "arrival_time",
+        "passenger_name",
+        "airline_id"
+      ],
+      "fix_approach": "Standardize column names to be more descriptive and consistent."
+    },
+    "32": {
+      "description": "Potentially incorrect seat_number format.",
+      "category": "Data Quality",
+      "severity": "Low",
+      "affected_columns": [
+        "seat_number"
+      ],
+      "fix_approach": "Verify seat_number format to ensure it follows expected patterns (e.g., row number followed by seat letter)."
+    },
+    "64": {
+      "description": "Mismatch between layovers count and layover_locations.",
+      "category": "Cross-Field Relationship",
+      "severity": "High",
+      "affected_columns": [
+        "layovers",
+        "layover_locations"
+      ],
+      "fix_approach": "Ensure layovers count matches the number of tokens in layover_locations."
+    }
+  }
+}

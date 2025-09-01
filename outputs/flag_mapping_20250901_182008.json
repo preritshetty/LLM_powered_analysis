@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "created_at": "2025-09-01T18:20:08.029370",
+    "total_flags": 3,
+    "max_flag_value": 4,
+    "description": "Binary flag mapping for Phase 2 data quality issues"
+  },
+  "flag_mapping": {
+    "1": "Contradictory values found in the 'Area Type' column.",
+    "2": "Negative values detected in the 'Price' column.",
+    "4": "Mismatch between numeric count column 'Bathrooms' and related text column 'Size'."
+  },
+  "issue_details": {
+    "1": {
+      "description": "Contradictory values found in the 'Area Type' column.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "Area Type"
+      ],
+      "fix_approach": "Investigate and correct the inconsistent values in the 'Area Type' column."
+    },
+    "2": {
+      "description": "Negative values detected in the 'Price' column.",
+      "category": "Business Logic Violations",
+      "severity": "Medium",
+      "affected_columns": [
+        "Price"
+      ],
+      "fix_approach": "Review and address the negative values in the 'Price' column."
+    },
+    "4": {
+      "description": "Mismatch between numeric count column 'Bathrooms' and related text column 'Size'.",
+      "category": "Cross-Field Relationship Validation",
+      "severity": "High",
+      "affected_columns": [
+        "Bathrooms",
+        "Size"
+      ],
+      "fix_approach": "Ensure the count in the 'Bathrooms' column corresponds accurately to the values in the 'Size' column."
+    }
+  }
+}

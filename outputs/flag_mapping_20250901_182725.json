@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "created_at": "2025-09-01T18:27:25.631026",
+    "total_flags": 8,
+    "max_flag_value": 128,
+    "description": "Binary flag mapping for Phase 2 data quality issues"
+  },
+  "flag_mapping": {
+    "1": "Departure date is after arrival date in some rows.",
+    "2": "Both is_window_seat and is_aisle_seat are marked as true, which is typically not possible.",
+    "4": "Duration does not match the difference between arrival and departure times.",
+    "8": "Mismatch between number_of_layovers count and layover locations.",
+    "16": "Inconsistent column naming, e.g., 'flight_number' and 'airline_id'.",
+    "32": "Potentially incorrect seat_number values that do not follow standard seat numbering conventions.",
+    "64": "Status 'Cancelled' but operational data like departure_gate and departure_terminal are present.",
+    "128": "Inconsistent date formats in departure_datetime and arrival_datetime."
+  },
+  "issue_details": {
+    "1": {
+      "description": "Departure date is after arrival date in some rows.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime"
+      ],
+      "fix_approach": "Ensure that the departure date is always before the arrival date."
+    },
+    "2": {
+      "description": "Both is_window_seat and is_aisle_seat are marked as true, which is typically not possible.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "is_window_seat",
+        "is_aisle_seat"
+      ],
+      "fix_approach": "Verify seat assignments to ensure only one of these can be true."
+    },
+    "4": {
+      "description": "Duration does not match the difference between arrival and departure times.",
+      "category": "Business Logic Violation",
+      "severity": "High",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime",
+        "flight_duration_hours"
+      ],
+      "fix_approach": "Recalculate duration based on the difference between arrival and departure times."
+    },
+    "8": {
+      "description": "Mismatch between number_of_layovers count and layover locations.",
+      "category": "Cross-Field Relationship",
+      "severity": "High",
+      "affected_columns": [
+        "number_of_layovers",
+        "layover_locations_list"
+      ],
+      "fix_approach": "Ensure the number of number_of_layovers matches the number of locations listed."
+    },
+    "16": {
+      "description": "Inconsistent column naming, e.g., 'flight_number' and 'airline_id'.",
+      "category": "Data Quality",
+      "severity": "Medium",
+      "affected_columns": [
+        "flight_number",
+        "airline_id"
+      ],
+      "fix_approach": "Standardize column names to be more descriptive and consistent."
+    },
+    "32": {
+      "description": "Potentially incorrect seat_number values that do not follow standard seat numbering conventions.",
+      "category": "Data Quality",
+      "severity": "Medium",
+      "affected_columns": [
+        "seat_number"
+      ],
+      "fix_approach": "Verify seat numbers against standard formats (e.g., A1, B2)."
+    },
+    "64": {
+      "description": "Status 'Cancelled' but operational data like departure_gate and departure_terminal are present.",
+      "category": "Data Consistency",
+      "severity": "Medium",
+      "affected_columns": [
+        "flight_status",
+        "departure_gate",
+        "departure_terminal"
+      ],
+      "fix_approach": "Remove operational data for cancelled flights or verify cancellation flight_status."
+    },
+    "128": {
+      "description": "Inconsistent date formats in departure_datetime and arrival_datetime.",
+      "category": "Data Quality",
+      "severity": "Low",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime"
+      ],
+      "fix_approach": "Ensure all date-time fields follow a consistent format, such as ISO 8601."
+    }
+  }
+}

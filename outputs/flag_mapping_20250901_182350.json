@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "created_at": "2025-09-01T18:23:50.788219",
+    "total_flags": 7,
+    "max_flag_value": 64,
+    "description": "Binary flag mapping for Phase 2 data quality issues"
+  },
+  "flag_mapping": {
+    "1": "Departure date is after arrival date in some rows.",
+    "2": "Both window_seat and aisle_seat are marked as true, which is typically not possible.",
+    "4": "Duration does not match the difference between arrival and departure times.",
+    "8": "Mismatch between layovers count and layover_locations entries.",
+    "16": "Inconsistent column naming and potential typos.",
+    "32": "Number of stops does not match the number of layovers.",
+    "64": "Status 'Cancelled' but operational data like gate and terminal are filled."
+  },
+  "issue_details": {
+    "1": {
+      "description": "Departure date is after arrival date in some rows.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime"
+      ],
+      "fix_approach": "Ensure that the departure date is always before the arrival date."
+    },
+    "2": {
+      "description": "Both window_seat and aisle_seat are marked as true, which is typically not possible.",
+      "category": "Data Consistency",
+      "severity": "Medium",
+      "affected_columns": [
+        "window_seat",
+        "aisle_seat"
+      ],
+      "fix_approach": "Verify seat assignments to ensure only one of window_seat or aisle_seat is true."
+    },
+    "4": {
+      "description": "Duration does not match the difference between arrival and departure times.",
+      "category": "Business Logic Violations",
+      "severity": "High",
+      "affected_columns": [
+        "departure_datetime",
+        "arrival_datetime",
+        "duration_hours"
+      ],
+      "fix_approach": "Recalculate duration based on the difference between arrival and departure times."
+    },
+    "8": {
+      "description": "Mismatch between layovers count and layover_locations entries.",
+      "category": "Business Logic Violations",
+      "severity": "High",
+      "affected_columns": [
+        "layovers",
+        "layover_locations"
+      ],
+      "fix_approach": "Ensure the number of layovers matches the number of entries in layover_locations."
+    },
+    "16": {
+      "description": "Inconsistent column naming and potential typos.",
+      "category": "Data Quality Issues",
+      "severity": "Medium",
+      "affected_columns": [
+        "flight_number",
+        "arrival_time"
+      ],
+      "fix_approach": "Standardize column names and correct typos."
+    },
+    "32": {
+      "description": "Number of stops does not match the number of layovers.",
+      "category": "Cross-Field Relationship Validation",
+      "severity": "High",
+      "affected_columns": [
+        "number_of_stops",
+        "layovers"
+      ],
+      "fix_approach": "Ensure that the number_of_stops is consistent with the layovers count."
+    },
+    "64": {
+      "description": "Status 'Cancelled' but operational data like gate and terminal are filled.",
+      "category": "Cross-Field Relationship Validation",
+      "severity": "Medium",
+      "affected_columns": [
+        "status",
+        "gate",
+        "terminal"
+      ],
+      "fix_approach": "Verify if operational data should be present for cancelled flights."
+    }
+  }
+}

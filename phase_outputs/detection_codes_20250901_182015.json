@@ -1,0 +1,28 @@
+{
+  "total_codes": 3,
+  "detection_codes": [
+    {
+      "flag_value": 1,
+      "detection_code": "df.loc[(df['Area Type'].str.strip().str.lower() == 'residential') | (df['Area Type'].str.strip().str.lower() == 'commercial'), 'flag_status'] |= 1",
+      "explanation": "This code detects contradictory values in the 'Area Type' column by checking for rows where 'Area Type' is neither 'residential' nor 'commercial'.",
+      "test_description": "Test by checking if the 'flag_status' column is updated for rows with inconsistent values in the 'Area Type' column.",
+      "safety_notes": "Ensure that the 'Area Type' values are normalized and consistent before running this detection code."
+    },
+    {
+      "flag_value": 2,
+      "detection_code": "df.loc[(pd.to_numeric(df['Price'], errors='coerce') < 0) & pd.to_numeric(df['Price'], errors='coerce').notna(), 'flag_status'] |= 2",
+      "explanation": "This code detects negative values in the 'Price' column by converting the column to numeric type and checking for values less than 0.",
+      "test_description": "To test this detection, provide sample data with negative values in the 'Price' column and run the code to see if the 'flag_status' is correctly flagged as 2.",
+      "safety_notes": "Ensure that the 'Price' column contains only numerical values. Review the flagged records to address the negative values appropriately."
+    },
+    {
+      "flag_value": 4,
+      "detection_code": "df.loc[(pd.to_numeric(df['Bathrooms'], errors='coerce').fillna(0).astype(int) != df['Size'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 4",
+      "explanation": "Checks for mismatch between Bathrooms and Size",
+      "test_description": "Create rows where Bathrooms does not equal number of items in Size",
+      "safety_notes": "Handles missing values, multiple delimiters (;,|,>,->)."
+    }
+  ],
+  "generation_timestamp": "2025-09-01T18:20:15.116959",
+  "llm_model": "gpt-3.5-turbo"
+}

@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "created_at": "2025-09-01T17:58:48.481911",
+    "total_flags": 5,
+    "max_flag_value": 16,
+    "description": "Binary flag mapping for Phase 2 data quality issues"
+  },
+  "flag_mapping": {
+    "1": "The 'window_seat' and 'aisle_seat' columns both have true values for the same row, which is not possible.",
+    "2": "The 'departure_date' is later than the 'arrival_date' in some rows, which is not possible.",
+    "4": "The 'airline_id' column has only 19 unique values out of 143 rows, which suggests possible data duplication.",
+    "8": "The 'layovers' and 'layover_locations' columns have mismatched counts.",
+    "16": "Some column names are not business-friendly and may cause confusion."
+  },
+  "issue_details": {
+    "1": {
+      "description": "The 'window_seat' and 'aisle_seat' columns both have true values for the same row, which is not possible.",
+      "category": "Data Consistency",
+      "severity": "High",
+      "affected_columns": [
+        "window_seat",
+        "aisle_seat"
+      ],
+      "fix_approach": "Check the data entry process for errors. If the issue persists, consider revising the data collection method to prevent such inconsistencies."
+    },
+    "2": {
+      "description": "The 'departure_date' is later than the 'arrival_date' in some rows, which is not possible.",
+      "category": "Business Logic Violations",
+      "severity": "High",
+      "affected_columns": [
+        "departure_date",
+        "arrival_date"
+      ],
+      "fix_approach": "Check the data entry process for errors. If the issue persists, consider revising the data collection method to prevent such inconsistencies."
+    },
+    "4": {
+      "description": "The 'airline_id' column has only 19 unique values out of 143 rows, which suggests possible data duplication.",
+      "category": "Data Quality Issues",
+      "severity": "Medium",
+      "affected_columns": [
+        "airline_id"
+      ],
+      "fix_approach": "Investigate the cause of the duplication. If it's due to data entry errors, consider implementing a unique constraint on the 'airline_id' column."
+    },
+    "8": {
+      "description": "The 'layovers' and 'layover_locations' columns have mismatched counts.",
+      "category": "Cross-Field Relationship Validation",
+      "severity": "High",
+      "affected_columns": [
+        "layovers",
+        "layover_locations"
+      ],
+      "fix_approach": "Check the data entry process for errors. If the issue persists, consider revising the data collection method to prevent such inconsistencies."
+    },
+    "16": {
+      "description": "Some column names are not business-friendly and may cause confusion.",
+      "category": "Column Naming",
+      "severity": "Low",
+      "affected_columns": [
+        "flight_number",
+        "departure_time",
+        "arrival_time",
+        "booking_code",
+        "passenger_name",
+        "airline_id"
+      ],
+      "fix_approach": "Rename the columns to more descriptive and business-friendly names."
+    }
+  }
+}

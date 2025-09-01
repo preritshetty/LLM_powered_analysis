@@ -49,14 +49,10 @@ def phase3_processing():
     st.session_state.selected_renamings = selected_renamings
 
     # --- Config ---
-    st.subheader("Code Generation Configuration")
-    col1, col2 = st.columns(2)
-    with col1:
-        code_model = st.selectbox("Code Model", ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"], index=0)
-        code_temperature = st.slider("Temperature", 0.0, 0.5, 0.1, 0.05)
-    with col2:
-        max_code_tokens = st.number_input("Max Tokens", 500, 2000, 1000, 100)
-        execution_timeout = st.number_input("Execution Timeout (s)", 10, 120, 30, 10)
+    code_model = "gpt-4o"
+    code_temperature = 0.1
+    max_code_tokens = 1000
+    
 
     # --- Generate & Execute ---
     if st.button("Apply Renaming & Generate Detection Codes", type="primary"):

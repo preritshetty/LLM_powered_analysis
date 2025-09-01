@@ -1,0 +1,75 @@
+{
+  "execution_summary": {
+    "total_rows": 10000,
+    "flagged_rows": 6691,
+    "clean_rows": 3309,
+    "flagged_percentage": 66.91,
+    "total_detections": 6691,
+    "execution_time_seconds": 0.03,
+    "successful_codes": 5,
+    "failed_codes": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-01T18:00:10.735560"
+  },
+  "individual_results": [
+    {
+      "flag_value": 1,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "Fallback for The 'window_seat' and 'aisle_seat' columns both have true values for the same row, which is not possible.",
+      "code": "# Fallback detection for flag 1\ndf.loc[df.index == -1, 'flag_status'] |= 1  # Placeholder",
+      "error": null
+    },
+    {
+      "flag_value": 2,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "Fallback for The 'departure_date' is later than the 'arrival_date' in some rows, which is not possible.",
+      "code": "# Fallback detection for flag 2\ndf.loc[df.index == -1, 'flag_status'] |= 2  # Placeholder",
+      "error": null
+    },
+    {
+      "flag_value": 4,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "Fallback for The 'airline_id' column has only 19 unique values out of 143 rows, which suggests possible data duplication.",
+      "code": "# Fallback detection for flag 4\ndf.loc[df.index == -1, 'flag_status'] |= 4  # Placeholder",
+      "error": null
+    },
+    {
+      "flag_value": 8,
+      "success": true,
+      "rows_detected": 6691,
+      "explanation": "Checks for mismatch between layovers and layover_locations",
+      "code": "df.loc[(pd.to_numeric(df['layovers'], errors='coerce').fillna(0).astype(int) != df['layover_locations'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 8",
+      "error": null
+    },
+    {
+      "flag_value": 16,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "Fallback for Some column names are not business-friendly and may cause confusion.",
+      "code": "# Fallback detection for flag 16\ndf.loc[df.index == -1, 'flag_status'] |= 16  # Placeholder",
+      "error": null
+    }
+  ],
+  "flag_breakdown": {
+    "individual_flags": {
+      "8": 6691
+    },
+    "combined_flags": {
+      "8": 6691
+    },
+    "flag_combinations": [
+      {
+        "flag_status": 8,
+        "individual_flags": [
+          8
+        ],
+        "flag_description": "Flags 8",
+        "row_count": 6691,
+        "binary_representation": "1000"
+      }
+    ]
+  }
+}

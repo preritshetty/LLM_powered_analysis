@@ -1,0 +1,59 @@
+{
+  "execution_summary": {
+    "total_rows": 12791,
+    "flagged_rows": 12029,
+    "clean_rows": 762,
+    "flagged_percentage": 94.04,
+    "total_detections": 12029,
+    "execution_time_seconds": 0.02,
+    "successful_codes": 3,
+    "failed_codes": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-01T18:20:15.168825"
+  },
+  "individual_results": [
+    {
+      "flag_value": 1,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "This code detects contradictory values in the 'Area Type' column by checking for rows where 'Area Type' is neither 'residential' nor 'commercial'.",
+      "code": "df.loc[(df['Area Type'].str.strip().str.lower() == 'residential') | (df['Area Type'].str.strip().str.lower() == 'commercial'), 'flag_status'] |= 1",
+      "error": null
+    },
+    {
+      "flag_value": 2,
+      "success": true,
+      "rows_detected": 0,
+      "explanation": "This code detects negative values in the 'Price' column by converting the column to numeric type and checking for values less than 0.",
+      "code": "df.loc[(pd.to_numeric(df['Price'], errors='coerce') < 0) & pd.to_numeric(df['Price'], errors='coerce').notna(), 'flag_status'] |= 2",
+      "error": null
+    },
+    {
+      "flag_value": 4,
+      "success": true,
+      "rows_detected": 12029,
+      "explanation": "Checks for mismatch between Bathrooms and Size",
+      "code": "df.loc[(pd.to_numeric(df['Bathrooms'], errors='coerce').fillna(0).astype(int) != df['Size'].fillna('').astype(str).apply(lambda x: len([i for i in re.split(r'[;,|>]|->', str(x)) if i.strip()]))), 'flag_status'] |= 4",
+      "error": null
+    }
+  ],
+  "flag_breakdown": {
+    "individual_flags": {
+      "4": 12029
+    },
+    "combined_flags": {
+      "4": 12029
+    },
+    "flag_combinations": [
+      {
+        "flag_status": 4,
+        "individual_flags": [
+          4
+        ],
+        "flag_description": "Flags 4",
+        "row_count": 12029,
+        "binary_representation": "100"
+      }
+    ]
+  }
+}

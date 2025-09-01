@@ -34,19 +34,17 @@ def phase2_processing(data):
                     st.dataframe(missing_report, use_container_width=True)
 
     # --- LLM Config ---
-    st.subheader("AI Analysis Configuration")
     api_key_present = bool(os.getenv('OPENAI_API_KEY'))
     if not api_key_present:
         st.error("❌ OpenAI API key not found. Please set OPENAI_API_KEY in .env or env variables.")
         return
 
-    col1, col2 = st.columns(2)
-    with col1:
-        model_choice = st.selectbox("AI Model", ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"], index=0)
-        temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.1)
-    with col2:
-        max_tokens = st.number_input("Max Tokens", 500, 4000, 1500, 100)
-        sample_size = st.number_input("Sample Size for Analysis", 50, 500, 150, 25)
+    # Fixed configuration (no user input needed)
+    model_choice = "gpt-4o"
+    temperature = 0.1
+    max_tokens = 1500
+    sample_size = 150
+
 
     # --- Data Sampling ---
     st.subheader("Data Sampling for Analysis")
